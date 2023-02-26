@@ -72,23 +72,20 @@ def go(config: DictConfig):
                     "data_check"),
                 "main",
                 parameters={
-                    "csv": config["data_check"]["csv"],
-                    "ref": config["data_check"]["ref"],
+                    "csv": "clean_sample.csv:latest",
+                    "ref": "clean_sample.csv:reference",
                     "kl_threshold": config["data_check"]["kl_threshold"],
-                    "min_price": config["data_check"]["min_price"],
-                    "max_price": config["data_check"]["max_price"]},
+                    "min_price": config["etl"]["min_price"],
+                    "max_price": config["etl"]["max_price"]},
             )
 
         if "data_split" in active_steps:
             _ = mlflow.run(
-                os.path.join(
-                    hydra.utils.get_original_cwd(),
-                    "components",
-                    "train_val_test_split"),
+                f"{config['main']['components_repository']}/train_val_test_split",
                 "main",
                 version='main',
                 parameters={
-                    "input": config["modeling"]["clean_data"],
+                    "input": "clean_sample.csv:latest",
                     "test_size": config["modeling"]["test_size"],
                     "random_seed": config["modeling"]["random_seed"],
                     "stratify_by": config["modeling"]["stratify_by"]},
@@ -112,7 +109,7 @@ def go(config: DictConfig):
                     "train_random_forest"),
                 "main",
                 parameters={
-                    "trainval_artifact": config["modeling"]["trainval_data"],
+                    "trainval_artifact": "trainval_data.csv:latest",
                     "val_size": config["modeling"]["val_size"],
                     "random_seed": config["modeling"]["random_seed"],
                     "stratify_by": config["modeling"]["stratify_by"],
@@ -127,8 +124,8 @@ def go(config: DictConfig):
                 f"{config['main']['components_repository']}/test_regression_model",
                 "main",
                 parameters={
-                    "mlflow_model": config["model_testing"]["mlflow_model"],
-                    "test_dataset": config["model_testing"]["test_dataset"],
+                    "mlflow_model": config["modeling"]["output_artifact"] + ":prod",
+                    "test_dataset": "test_data.csv:latest"
                 },
             )
 
