@@ -12,4 +12,3 @@ dependencies:
       - protobuf==3.20.* 
       - numpy==1.23.5
       - wandb==0.13.2
-      - wandb==0.10.31
